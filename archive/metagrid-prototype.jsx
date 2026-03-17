@@ -44,6 +44,14 @@ function FadeIn({ children, delay = 0, style = {} }) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const prefersReducedMotion =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion || typeof IntersectionObserver === "undefined") {
+      setVisible(true);
+      return;
+    }
     const obs = new IntersectionObserver(
       ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
       { threshold: 0.15 }
@@ -116,7 +124,7 @@ function Btn({ children, primary, onClick, href, disabled, style = {} }) {
     pointerEvents: disabled ? "none" : "auto",
     ...style,
   };
-  if (href) return <a href={href} style={base}>{children}</a>;
+  if (href) return <a href={href} onClick={onClick} style={base}>{children}</a>;
   return <button onClick={onClick} disabled={disabled} style={base}>{children}</button>;
 }
 
@@ -132,6 +140,39 @@ function Nav({ activeSection }) {
     { id: "team", label: "Team" },
     { id: "faq", label: "FAQ" },
   ];
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileNav, setMobileNav] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
+    const media = window.matchMedia("(max-width: 860px)");
+    const sync = () => {
+      setMobileNav(media.matches);
+      if (!media.matches) setMenuOpen(false);
+    };
+    sync();
+    if (typeof media.addEventListener === "function") {
+      media.addEventListener("change", sync);
+      return () => media.removeEventListener("change", sync);
+    }
+    media.addListener(sync);
+    return () => media.removeListener(sync);
+  }, []);
+
+  const navLinkStyle = (id, compact = false) => ({
+    fontFamily: FONTS.mono,
+    fontSize: compact ? 12 : 11,
+    letterSpacing: compact ? "0.08em" : "0.06em",
+    color: activeSection === id ? COLORS.accent : COLORS.textMuted,
+    textDecoration: "none",
+    padding: compact ? "10px 0" : "6px 10px",
+    borderRadius: 4,
+    transition: "color 0.2s",
+    whiteSpace: "nowrap",
+    flexShrink: 0,
+    textTransform: "uppercase",
+  });
+
   return (
     <nav style={{
       position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
@@ -155,26 +196,65 @@ function Nav({ activeSection }) {
           }} />
           METAGRID
         </a>
-        <div style={{
-          display: "flex", gap: 6, alignItems: "center",
-          overflowX: "auto", scrollbarWidth: "none", msOverflowStyle: "none",
-          WebkitOverflowScrolling: "touch", flexShrink: 1, minWidth: 0,
-        }}>
+        {mobileNav ? (
+          <button
+            type="button"
+            onClick={() => setMenuOpen(open => !open)}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            aria-controls="metagrid-mobile-nav"
+            style={{
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              width: 40, height: 40, borderRadius: 6, border: `1px solid ${COLORS.borderLight}`,
+              background: "transparent", color: COLORS.textMuted, cursor: "pointer",
+              padding: 0, flexShrink: 0,
+            }}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              {menuOpen ? <path d="M6 6l12 12M6 18L18 6" /> : <path d="M4 6h16M4 12h16M4 18h16" />}
+            </svg>
+          </button>
+        ) : (
+          <div style={{
+            display: "flex", gap: 6, alignItems: "center",
+            overflowX: "auto", scrollbarWidth: "none", msOverflowStyle: "none",
+            WebkitOverflowScrolling: "touch", flexShrink: 1, minWidth: 0,
+          }}>
+            {links.map(l => (
+              <a key={l.id} href={`#${l.id}`} aria-current={activeSection === l.id ? "location" : undefined} style={navLinkStyle(l.id)}>
+                {l.label.toUpperCase()}
+              </a>
+            ))}
+            <Btn primary href="#contact" style={{ marginLeft: 8, padding: "8px 18px", fontSize: 12, flexShrink: 0 }}>
+              Get Involved
+            </Btn>
+          </div>
+        )}
+      </div>
+      {mobileNav && menuOpen && (
+        <div
+          id="metagrid-mobile-nav"
+          style={{
+            maxWidth: 1100, margin: "0 auto", padding: "10px 0 16px",
+            display: "flex", flexDirection: "column", gap: 4,
+          }}
+        >
           {links.map(l => (
-            <a key={l.id} href={`#${l.id}`} style={{
-              fontFamily: FONTS.mono, fontSize: 11, letterSpacing: "0.06em",
-              color: activeSection === l.id ? COLORS.accent : COLORS.textMuted,
-              textDecoration: "none", padding: "6px 10px", borderRadius: 4,
-              transition: "color 0.2s", whiteSpace: "nowrap", flexShrink: 0,
-            }}>
-              {l.label.toUpperCase()}
+            <a
+              key={l.id}
+              href={`#${l.id}`}
+              aria-current={activeSection === l.id ? "location" : undefined}
+              onClick={() => setMenuOpen(false)}
+              style={navLinkStyle(l.id, true)}
+            >
+              {l.label}
             </a>
           ))}
-          <Btn primary href="#contact" style={{ marginLeft: 8, padding: "8px 18px", fontSize: 12, flexShrink: 0 }}>
+          <Btn primary href="#contact" onClick={() => setMenuOpen(false)} style={{ marginTop: 8, textAlign: "center" }}>
             Get Involved
           </Btn>
         </div>
-      </div>
+      )}
     </nav>
   );
 }
@@ -1123,13 +1203,21 @@ export default function MetagridSite() {
 
   useEffect(() => {
     // Load fonts
-    const link = document.createElement("link");
-    link.href = "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap";
-    link.rel = "stylesheet";
-    document.head.appendChild(link);
+    const linkId = "metagrid-google-fonts";
+    let ownedLink = false;
+    let link = document.getElementById(linkId);
+    if (!link) {
+      link = document.createElement("link");
+      link.id = linkId;
+      link.href = "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap";
+      link.rel = "stylesheet";
+      document.head.appendChild(link);
+      ownedLink = true;
+    }
 
     // Global focus-visible styles
     const styleId = "metagrid-focus-styles";
+    let ownedStyle = false;
     if (!document.getElementById(styleId)) {
       const style = document.createElement("style");
       style.id = styleId;
@@ -1139,32 +1227,50 @@ export default function MetagridSite() {
           outline-offset: 2px;
         }
         nav > div > div::-webkit-scrollbar { display: none; }
+        @media (prefers-reduced-motion: reduce) {
+          html { scroll-behavior: auto; }
+        }
       `;
       document.head.appendChild(style);
+      ownedStyle = true;
     }
+
+    return () => {
+      if (ownedLink && link?.parentNode) link.parentNode.removeChild(link);
+      const style = document.getElementById(styleId);
+      if (ownedStyle && style?.parentNode) style.parentNode.removeChild(style);
+    };
   }, []);
 
   useEffect(() => {
     const sections = ["whynow", "what", "tech", "roadmap", "safety", "team", "faq", "contact"];
     let ticking = false;
+    let frameId = null;
     const handleScroll = () => {
       if (ticking) return;
       ticking = true;
-      requestAnimationFrame(() => {
+      frameId = requestAnimationFrame(() => {
+        let nextSection = "";
         for (const id of [...sections].reverse()) {
           const el = document.getElementById(id);
           if (el && el.getBoundingClientRect().top < 200) {
-            setActiveSection(id);
-            ticking = false;
-            return;
+            nextSection = id;
+            break;
           }
         }
-        setActiveSection("");
+        setActiveSection(current => (current === nextSection ? current : nextSection));
         ticking = false;
+        frameId = null;
       });
     };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+      if (frameId !== null) cancelAnimationFrame(frameId);
+    };
   }, []);
 
   return (
@@ -1172,7 +1278,7 @@ export default function MetagridSite() {
       background: COLORS.bg, color: COLORS.text, minHeight: "100vh",
       overflowX: "hidden",
     }}>
-      <a href="#hero" style={{
+      <a href="#main-content" style={{
         position: "fixed", top: -100, left: 16, zIndex: 999,
         background: COLORS.accent, color: COLORS.bg, padding: "8px 16px",
         borderRadius: 6, fontFamily: FONTS.body, fontWeight: 700, fontSize: 13,
@@ -1182,7 +1288,7 @@ export default function MetagridSite() {
       </a>
       <GridBackground />
       <Nav activeSection={activeSection} />
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <Hero />
         <div style={{
           height: 1, background: `linear-gradient(to right, transparent, ${COLORS.border}, transparent)`,

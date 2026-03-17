@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Metagrid
+
+**Wireless power infrastructure for remote AI data centers.**
+
+Metagrid is engineering a hierarchical, safety-first wireless power network using metamaterials and adaptive control — delivering utility-scale energy without traditional last-mile wiring. Patent pending.
+
+## Stack
+
+- **Framework:** Next.js 15 (App Router)
+- **Styling:** Tailwind CSS 4
+- **Fonts:** DM Sans, IBM Plex Sans, IBM Plex Mono (via next/font)
+- **Deploy target:** Vercel
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+  app/
+    page.tsx            # Landing page (hero + why now + what)
+    technology/         # Tech pillars
+    roadmap/            # Milestones + funding gates
+    safety/             # Safety architecture
+    team/               # Team bios
+    contact/            # Contact form
+    faq/                # FAQ accordion
+    layout.tsx          # Global layout (nav, footer, fonts, metadata)
+    globals.css         # Design tokens + base styles
+  components/
+    Nav.tsx             # Responsive nav with mobile hamburger
+    Footer.tsx          # Site footer
+    Section.tsx         # Reusable section/label/title components
+    FadeIn.tsx          # Intersection Observer fade-in animation
+    StatCard.tsx        # Stat display card
+    GridBackground.tsx  # Ambient grid pattern
+  lib/
+    tokens.ts           # Color + font design tokens
+    fonts.ts            # next/font configuration
+archive/
+  metagrid-prototype.jsx  # Original single-file prototype
+```
 
-## Learn More
+## Deploy
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run build
+npx vercel
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Contact Form
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Currently client-side only. To wire to Formspree, add your form ID in `src/app/contact/page.tsx`.
 
-## Deploy on Vercel
+## Team
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Connor** — Founder, Lead Researcher & System Architect
+- **Dave** — Engineering & Product
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Status
+
+Pre-seed stage. Patent pending. Seeking investment for Phase 1 validation.
