@@ -23,8 +23,10 @@ Metagrid is a public facing site for a wireless power infrastructure concept. It
 
 | ID | Severity | Status | Title | Notes |
 |----|----------|--------|-------|-------|
-
-No active issues are recorded in this file yet.
+| 001 | P2 | open | Contact form Formspree ID falls back to YOUR_FORM_ID placeholder | Submissions fail silently if env var not set |
+| 002 | P2 | open | FAQ accordion truncates answers longer than 300px | Hardcoded max-height with no overflow scroll |
+| 003 | P2 | open | Subpages missing per-page OpenGraph and Twitter metadata | Social shares show generic homepage description for all routes |
+| 004 | P2 | open | No JSON-LD structured data for Organization or FAQPage | Missed rich snippet opportunities in search results |
 
 ## Session Log
 
