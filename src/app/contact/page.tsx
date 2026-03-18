@@ -5,24 +5,56 @@ import { Section, SectionLabel, SectionTitle } from "@/components/Section";
 import FadeIn from "@/components/FadeIn";
 
 export default function ContactPage() {
-  const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", type: "investor", message: "" });
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<{ name?: string; email?: string }>({});
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    if (!form.name.trim() || !form.email.trim()) {
-      setError("Name and email are required.");
+    const nextErrors: { name?: string; email?: string } = {};
+
+    if (!form.name.trim()) {
+      nextErrors.name = "Name is required.";
+    }
+    if (!form.email.trim()) {
+      nextErrors.email = "Email is required.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      nextErrors.email = "Please enter a valid email address.";
+    }
+
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) {
+      setSubmitStatus("idle");
       return;
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      setError("Please enter a valid email address.");
-      return;
+
+    setSubmitStatus("submitting");
+
+    const formData = { ...form };
+
+    try {
+      const response = await fetch(
+        `https://formspree.io/f/${process.env.NEXT_PUBLIC_FORMSPREE_ID || "YOUR_FORM_ID"}`,
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      if (response.ok) {
+        setSubmitStatus("success");
+        setForm({ name: "", email: "", type: "investor", message: "" });
+        setErrors({});
+      } else {
+        setSubmitStatus("error");
+      }
+    } catch {
+      setSubmitStatus("error");
     }
-    // TODO: Wire to Formspree or API route
-    // await fetch("https://formspree.io/f/YOUR_ID", { method: "POST", body: JSON.stringify(form), headers: { "Content-Type": "application/json" } });
-    setSubmitted(true);
   };
 
   const inputClass =
@@ -56,37 +88,53 @@ export default function ContactPage() {
           ))}
         </FadeIn>
         <FadeIn delay={0.2}>
-          {submitted ? (
-            <div className="bg-[#12151c] rounded-lg border border-[#00d4aa44] p-10 text-center">
-              <div className="text-3xl mb-4">✓</div>
-              <div className="font-[var(--font-display)] text-lg font-bold text-white mb-2">
-                Thank you
-              </div>
-              <div className="font-[var(--font-body)] text-sm text-[#8892a4]">
-                We&apos;ll be in touch within 48 hours.
-              </div>
-            </div>
-          ) : (
-            <form
-              onSubmit={handleSubmit}
-              className="bg-[#12151c] rounded-lg border border-[#1f2533] p-8 flex flex-col gap-4"
-            >
+          <form
+            onSubmit={handleSubmit}
+            className="bg-[#12151c] rounded-lg border border-[#1f2533] p-8 flex flex-col gap-4"
+          >
+            <div>
+              <label htmlFor="contact-name" className="sr-only">Your name</label>
               <input
+                id="contact-name"
                 placeholder="Your name"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 className={inputClass}
                 required
+                aria-required="true"
+                aria-describedby={errors.name ? "name-error" : undefined}
+                aria-invalid={!!errors.name}
               />
+              {errors.name && (
+                <span id="name-error" role="alert" className="text-red-400 text-sm mt-1">
+                  {errors.name}
+                </span>
+              )}
+            </div>
+            <div>
+              <label htmlFor="contact-email" className="sr-only">Email address</label>
               <input
+                id="contact-email"
                 placeholder="Email address"
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 className={inputClass}
                 required
+                aria-required="true"
+                aria-describedby={errors.email ? "email-error" : undefined}
+                aria-invalid={!!errors.email}
               />
+              {errors.email && (
+                <span id="email-error" role="alert" className="text-red-400 text-sm mt-1">
+                  {errors.email}
+                </span>
+              )}
+            </div>
+            <div>
+              <label htmlFor="contact-type" className="sr-only">Inquiry type</label>
               <select
+                id="contact-type"
                 value={form.type}
                 onChange={(e) => setForm({ ...form, type: e.target.value })}
                 className={`${inputClass} cursor-pointer`}
@@ -96,24 +144,30 @@ export default function ContactPage() {
                 <option value="press">Press / Media</option>
                 <option value="other">Other</option>
               </select>
+            </div>
+            <div>
+              <label htmlFor="contact-message" className="sr-only">Message</label>
               <textarea
+                id="contact-message"
                 placeholder="Tell us briefly what you're interested in..."
                 rows={4}
                 value={form.message}
                 onChange={(e) => setForm({ ...form, message: e.target.value })}
                 className={`${inputClass} resize-y`}
               />
-              {error && (
-                <div className="text-[#ef4444] text-sm font-[var(--font-body)]">{error}</div>
-              )}
-              <button
-                type="submit"
-                className="w-full py-3 text-sm font-semibold bg-[#00d4aa] text-[#0a0c10] rounded-md hover:brightness-110 transition-all cursor-pointer"
-              >
-                Send Request
-              </button>
-            </form>
-          )}
+            </div>
+            <button
+              type="submit"
+              disabled={submitStatus === "submitting"}
+              className="w-full py-3 text-sm font-semibold bg-[#00d4aa] text-[#0a0c10] rounded-md hover:brightness-110 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {submitStatus === "submitting" ? "Sending..." : "Send Request"}
+            </button>
+            <div aria-live="polite" className="mt-4">
+              {submitStatus === "success" && <p className="text-[#00d4aa]">Message sent. We&apos;ll be in touch.</p>}
+              {submitStatus === "error" && <p className="text-red-400">Something went wrong. Please try again.</p>}
+            </div>
+          </form>
         </FadeIn>
       </div>
     </Section>

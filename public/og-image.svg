@@ -1,0 +1,36 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#0A0C10"/>
+  <rect x="48" y="48" width="1104" height="534" rx="28" fill="url(#panel)" stroke="rgba(255,255,255,0.12)"/>
+  <path d="M151 176H1049" stroke="#1F2533" stroke-width="2"/>
+  <path d="M151 454H1049" stroke="#1F2533" stroke-width="2"/>
+  <path d="M232 128V502" stroke="#1F2533" stroke-width="2"/>
+  <path d="M600 128V502" stroke="#1F2533" stroke-width="2"/>
+  <path d="M968 128V502" stroke="#1F2533" stroke-width="2"/>
+  <circle cx="232" cy="176" r="14" fill="#00D4AA"/>
+  <circle cx="600" cy="315" r="18" fill="#7CFFDE"/>
+  <circle cx="968" cy="454" r="14" fill="#00D4AA"/>
+  <path d="M232 176L600 315L968 454" stroke="url(#beam)" stroke-width="6" stroke-linecap="round"/>
+  <path d="M232 454L600 315L968 176" stroke="url(#beam)" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+  <rect x="120" y="94" width="148" height="36" rx="18" fill="#12151C" stroke="#1F2533"/>
+  <text x="194" y="117" text-anchor="middle" fill="#00D4AA" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" letter-spacing="2">METAGRID</text>
+  <text x="120" y="256" fill="#E8EAF0" font-family="Arial, Helvetica, sans-serif" font-size="74" font-weight="700">
+    Wireless Power
+  </text>
+  <text x="120" y="338" fill="#E8EAF0" font-family="Arial, Helvetica, sans-serif" font-size="74" font-weight="700">
+    Infrastructure for AI
+  </text>
+  <text x="120" y="402" fill="#8892A4" font-family="Arial, Helvetica, sans-serif" font-size="28">
+    Hierarchical, safety-first energy delivery for remote compute.
+  </text>
+  <defs>
+    <linearGradient id="panel" x1="600" y1="48" x2="600" y2="582" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#10141B"/>
+      <stop offset="1" stop-color="#0D1015"/>
+    </linearGradient>
+    <linearGradient id="beam" x1="232" y1="176" x2="968" y2="454" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00D4AA"/>
+      <stop offset="0.5" stop-color="#7CFFDE"/>
+      <stop offset="1" stop-color="#00D4AA"/>
+    </linearGradient>
+  </defs>
+</svg>

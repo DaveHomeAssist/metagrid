@@ -11,12 +11,25 @@ export default function FadeIn({
   delay?: number;
   className?: string;
 }) {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    if (prefersReducedMotion || typeof IntersectionObserver === "undefined") {
+      setVisible(true);
+      return;
+    }
     const obs = new IntersectionObserver(
       ([e]) => {
         if (e.isIntersecting) {
@@ -28,16 +41,18 @@ export default function FadeIn({
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, []);
+  }, [prefersReducedMotion]);
 
   return (
     <div
       ref={ref}
       className={className}
       style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(28px)",
-        transition: `opacity 0.7s ease ${delay}s, transform 0.7s ease ${delay}s`,
+        opacity: prefersReducedMotion ? 1 : visible ? 1 : 0,
+        transform: prefersReducedMotion ? "none" : visible ? "translateY(0)" : "translateY(28px)",
+        transition: prefersReducedMotion
+          ? "none"
+          : `opacity 0.7s ease ${delay}s, transform 0.7s ease ${delay}s`,
       }}
     >
       {children}

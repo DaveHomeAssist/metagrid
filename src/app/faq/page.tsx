@@ -23,7 +23,7 @@ export default function FAQPage() {
         <SectionLabel text="FAQ" />
         <SectionTitle>Common questions</SectionTitle>
       </FadeIn>
-      <div className="mt-8 max-w-[720px]">
+      <div role="region" aria-label="Frequently asked questions" className="mt-8 max-w-[720px]">
         {faqs.map((f, i) => (
           <FadeIn key={i} delay={i * 0.08}>
             <div className="border-b border-[#1f2533] py-5">
@@ -31,6 +31,8 @@ export default function FAQPage() {
                 onClick={() => setOpen(open === i ? null : i)}
                 className="bg-transparent border-none cursor-pointer flex justify-between items-center w-full text-left p-0"
                 aria-expanded={open === i}
+                aria-controls={`faq-panel-${i}`}
+                id={`faq-header-${i}`}
               >
                 <span className="font-[var(--font-display)] text-base font-semibold text-white">
                   {f.q}
@@ -43,6 +45,9 @@ export default function FAQPage() {
                 </span>
               </button>
               <div
+                id={`faq-panel-${i}`}
+                role="region"
+                aria-labelledby={`faq-header-${i}`}
                 className="overflow-hidden transition-[max-height] duration-300 ease-out"
                 style={{ maxHeight: open === i ? 300 : 0 }}
               >
