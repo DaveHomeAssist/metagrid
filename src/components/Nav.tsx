@@ -58,7 +58,7 @@ export default function Nav() {
             <Link
               key={l.href}
               href={l.href}
-              className={`font-[var(--font-mono)] text-[11px] tracking-wider uppercase px-3 py-1.5 rounded transition-colors ${
+              className={`font-[var(--font-mono)] text-[11px] tracking-wider uppercase px-3 py-1.5 rounded transition-colors focus-visible:ring-2 focus-visible:ring-[#00d4aa] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0c10] ${
                 pathname === l.href
                   ? "text-[#00d4aa]"
                   : "text-[#8892a4] hover:text-white"
@@ -69,7 +69,7 @@ export default function Nav() {
           ))}
           <Link
             href="/contact"
-            className="ml-2 px-4 py-2 text-xs font-semibold bg-[#00d4aa] text-[#0a0c10] rounded-md hover:brightness-110 transition-all"
+            className="ml-2 px-4 py-2 text-xs font-semibold bg-[#00d4aa] text-[#0a0c10] rounded-md hover:brightness-110 transition-all focus-visible:ring-2 focus-visible:ring-[#00d4aa] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0c10]"
           >
             Get Involved
           </Link>
@@ -77,7 +77,7 @@ export default function Nav() {
 
         {/* Mobile hamburger */}
         <button
-          className="md:hidden p-2 text-[#8892a4]"
+          className="md:hidden p-2 text-[#8892a4] rounded focus-visible:ring-2 focus-visible:ring-[#00d4aa] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0c10]"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label={menuOpen ? "Close menu" : "Open menu"}
           aria-expanded={menuOpen}
