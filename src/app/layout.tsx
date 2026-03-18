@@ -11,6 +11,9 @@ export const metadata: Metadata = {
     default: "Metagrid — Wireless Power Infrastructure",
     template: "%s | Metagrid",
   },
+  icons: {
+    icon: "/favicon.svg",
+  },
   description:
     "Metagrid is engineering a hierarchical, safety-first wireless power network using metamaterials and adaptive control — delivering utility-scale energy to remote AI data centers without traditional last-mile wiring.",
   robots: { index: true, follow: true },
