@@ -11,7 +11,6 @@ const links = [
   { href: "/safety", label: "Safety" },
   { href: "/team", label: "Team" },
   { href: "/faq", label: "FAQ" },
-  { href: "/contact", label: "Contact" },
 ];
 
 export default function Nav() {
@@ -39,6 +38,27 @@ export default function Nav() {
     return () => {
       document.body.style.overflow = "";
     };
+  }, [menuOpen]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const menu = document.getElementById("mobile-menu");
+    if (!menu) return;
+    const focusable = menu.querySelectorAll<HTMLElement>(
+      'a, button, [tabindex]:not([tabindex="-1"])'
+    );
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    first?.focus();
+    const trap = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      if (e.shiftKey ? document.activeElement === first : document.activeElement === last) {
+        e.preventDefault();
+        (e.shiftKey ? last : first)?.focus();
+      }
+    };
+    document.addEventListener("keydown", trap);
+    return () => document.removeEventListener("keydown", trap);
   }, [menuOpen]);
 
   return (
@@ -114,6 +134,13 @@ export default function Nav() {
               {l.label}
             </Link>
           ))}
+          <Link
+            href="/contact"
+            onClick={() => setMenuOpen(false)}
+            className="mt-2 px-4 py-2 text-xs font-semibold text-center bg-[#00d4aa] text-[#0a0c10] rounded-md"
+          >
+            Get Involved
+          </Link>
         </div>
       )}
     </nav>

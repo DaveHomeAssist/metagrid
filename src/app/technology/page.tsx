@@ -2,7 +2,22 @@ import { Metadata } from "next";
 import { Section, SectionLabel, SectionTitle, SectionBody } from "@/components/Section";
 import FadeIn from "@/components/FadeIn";
 
-export const metadata: Metadata = { title: "Technology" };
+export const metadata: Metadata = {
+  title: "Technology",
+  description:
+    "Three interlocking technology pillars — metamaterials, adaptive beamforming, and hierarchical distribution — form the Metagrid wireless power architecture.",
+  openGraph: {
+    title: "Technology | Metagrid",
+    description:
+      "Three interlocking technology pillars — metamaterials, adaptive beamforming, and hierarchical distribution — form the Metagrid wireless power architecture.",
+    url: "https://metagrid.energy/technology",
+  },
+  twitter: {
+    title: "Technology | Metagrid",
+    description:
+      "Three interlocking technology pillars — metamaterials, adaptive beamforming, and hierarchical distribution — form the Metagrid wireless power architecture.",
+  },
+};
 
 const pillars = [
   {

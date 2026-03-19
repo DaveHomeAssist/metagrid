@@ -48,12 +48,14 @@ export default function FAQPage() {
                 id={`faq-panel-${i}`}
                 role="region"
                 aria-labelledby={`faq-header-${i}`}
-                className="overflow-hidden transition-[max-height] duration-300 ease-out"
-                style={{ maxHeight: open === i ? 300 : 0 }}
+                className="grid transition-[grid-template-rows] duration-300 ease-out"
+                style={{ gridTemplateRows: open === i ? "1fr" : "0fr" }}
               >
-                <p className="font-[var(--font-body)] text-sm text-[#8892a4] leading-relaxed mt-3 pr-10">
-                  {f.a}
-                </p>
+                <div className="overflow-hidden">
+                  <p className="font-[var(--font-body)] text-sm text-[#8892a4] leading-relaxed mt-3 pr-10">
+                    {f.a}
+                  </p>
+                </div>
               </div>
             </div>
           </FadeIn>

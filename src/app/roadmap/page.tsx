@@ -2,7 +2,22 @@ import { Metadata } from "next";
 import { Section, SectionLabel, SectionTitle, SectionBody } from "@/components/Section";
 import FadeIn from "@/components/FadeIn";
 
-export const metadata: Metadata = { title: "Roadmap" };
+export const metadata: Metadata = {
+  title: "Roadmap",
+  description:
+    "Three funding-gated R&D phases from concept validation to integrated prototype. Each milestone has defined exit criteria — no milestone, no next phase.",
+  openGraph: {
+    title: "Roadmap | Metagrid",
+    description:
+      "Three funding-gated R&D phases from concept validation to integrated prototype. Each milestone has defined exit criteria — no milestone, no next phase.",
+    url: "https://metagrid.energy/roadmap",
+  },
+  twitter: {
+    title: "Roadmap | Metagrid",
+    description:
+      "Three funding-gated R&D phases from concept validation to integrated prototype. Each milestone has defined exit criteria — no milestone, no next phase.",
+  },
+};
 
 const phases = [
   {

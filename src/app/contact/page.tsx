@@ -30,11 +30,17 @@ export default function ContactPage() {
 
     setSubmitStatus("submitting");
 
+    if (!process.env.NEXT_PUBLIC_FORMSPREE_ID) {
+      console.error("NEXT_PUBLIC_FORMSPREE_ID is not set");
+      setSubmitStatus("error");
+      return;
+    }
+
     const formData = { ...form };
 
     try {
       const response = await fetch(
-        `https://formspree.io/f/${process.env.NEXT_PUBLIC_FORMSPREE_ID || "YOUR_FORM_ID"}`,
+        `https://formspree.io/f/${process.env.NEXT_PUBLIC_FORMSPREE_ID}`,
         {
           method: "POST",
           headers: {

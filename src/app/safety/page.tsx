@@ -2,7 +2,22 @@ import { Metadata } from "next";
 import { Section, SectionLabel, SectionTitle, SectionBody } from "@/components/Section";
 import FadeIn from "@/components/FadeIn";
 
-export const metadata: Metadata = { title: "Safety" };
+export const metadata: Metadata = {
+  title: "Safety",
+  description:
+    "Metagrid's safety model is built into every layer — beam confinement, real-time sensing, hardware interlocks, and a default-OFF fail-safe architecture designed to meet FCC, IEEE, and ICNIRP standards.",
+  openGraph: {
+    title: "Safety | Metagrid",
+    description:
+      "Metagrid's safety model is built into every layer — beam confinement, real-time sensing, hardware interlocks, and a default-OFF fail-safe architecture designed to meet FCC, IEEE, and ICNIRP standards.",
+    url: "https://metagrid.energy/safety",
+  },
+  twitter: {
+    title: "Safety | Metagrid",
+    description:
+      "Metagrid's safety model is built into every layer — beam confinement, real-time sensing, hardware interlocks, and a default-OFF fail-safe architecture designed to meet FCC, IEEE, and ICNIRP standards.",
+  },
+};
 
 const pillars = [
   { title: "Beam Confinement", icon: "◎", desc: "Metamaterial-guided beams operate within defined safety corridors. Power is delivered directionally, not broadcast." },

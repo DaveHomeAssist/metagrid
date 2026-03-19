@@ -2,7 +2,22 @@ import { Metadata } from "next";
 import { Section, SectionLabel, SectionTitle } from "@/components/Section";
 import FadeIn from "@/components/FadeIn";
 
-export const metadata: Metadata = { title: "Team" };
+export const metadata: Metadata = {
+  title: "Team",
+  description:
+    "Meet the team behind Metagrid and the technical roles we're actively building toward — from RF engineering to metamaterials research and safety compliance.",
+  openGraph: {
+    title: "Team | Metagrid",
+    description:
+      "Meet the team behind Metagrid and the technical roles we're actively building toward — from RF engineering to metamaterials research and safety compliance.",
+    url: "https://metagrid.energy/team",
+  },
+  twitter: {
+    title: "Team | Metagrid",
+    description:
+      "Meet the team behind Metagrid and the technical roles we're actively building toward — from RF engineering to metamaterials research and safety compliance.",
+  },
+};
 
 const seeking = [
   "RF / Microwave Engineer",
