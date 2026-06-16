@@ -18,6 +18,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Standalone electrical suite — vanilla JS/HTML, not part of the Next app;
+    // must not be linted with Next/TypeScript rules (require()/var/empty-catch).
+    "wiring-shared.js",
+    "tests/**",
   ]),
 ]);
 
