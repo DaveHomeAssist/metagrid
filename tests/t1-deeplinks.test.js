@@ -106,21 +106,6 @@ function count(html, re) {
     window.dispatchEvent(new window.Event("hashchange"));
   }
 
-  // collect console errors thrown during script execution
-  function withErrorTrap(file, fn) {
-    const errs = [];
-    const orig = console.error;
-    try {
-      const { window } = loadPage(file);
-      window.addEventListener && window.addEventListener("error", (e) => errs.push(e.message || String(e)));
-      fn(window);
-      return { window, errs };
-    } catch (e) {
-      errs.push(e.message);
-      return { window: null, errs };
-    }
-  }
-
   // reference
   {
     console.log("\n-- residential-wiring-reference.html --");

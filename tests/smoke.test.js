@@ -193,7 +193,7 @@ function pointer(win, type, target, x, y) {
     };
     const out = () => (d.getElementById("calcOut") ? d.getElementById("calcOut").textContent : "");
     setCalc({ cond14: 0, cond12: 3, cond10: 0, devices: 1, grounds: 1, clamps: 1, boxsize: 22.5 });
-    ok(/cu in/.test(out()) && /22\.50|sufficient|Headroom/.test(out()), "reference calc renders for 3x12 + device");
+    ok(/cu in/.test(out()) && /15\.75/.test(out()), "reference calc computes required=15.75 cu in for 3x12+device (derived value, not echoed input)");
     // mixed gauge -> caveat unhides
     setCalc({ cond14: 2, cond10: 2 });
     const caveat = d.getElementById("mixedGaugeCaveat");

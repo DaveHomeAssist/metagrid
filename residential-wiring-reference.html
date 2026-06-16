@@ -1432,6 +1432,9 @@ Outlet circuit (existing) ───┬─── outlet ─── outlet ──�
       est=WiringShared.loadEstimate(proj.loads||[]);
       billOfMaterials=WiringShared.bom(proj.items||[]);
     }catch(e){ host.innerHTML=''; return; }
+    var _sig; try{ _sig=JSON.stringify(proj); }catch(_e){ _sig=null; }
+    if(host.innerHTML && _sig!=null && _sig===mgRenderProjectSnapshot._sig) return;  // skip redundant re-render (focus+visibilitychange double-fire)
+    mgRenderProjectSnapshot._sig=_sig;
     var nC=(proj.circuits||[]).length, nL=(proj.loads||[]).length, nI=(proj.items||[]).length;
     if(!nC && !nI){
       host.innerHTML='<strong>Project data</strong><div style="margin-top:6px;color:var(--ink-faint,#888)">No shared project yet. Open the <a href="panel-schedule-56HA.html">panel schedule</a> and <a href="basement-planner.html">planner</a> to populate circuits, loads, and placed items.</div>';

@@ -905,11 +905,15 @@ rows.addEventListener('keydown',e=>{
 // ---- orchestration + toast ----
 // R4 bridge: Panel OWNS circuits[]/loads[] — publish them to the shared project
 // (read-modify-write, so the Planner's items[] slice is never clobbered).
+var _mgPanelSig=null;
 function syncProjectFromPanel(){
   if(!window.WiringShared) return;
   try{
     var circuits=C.map(function(c){ return {id:c.id, name:c.name, amps:c.amps, volt:c.volt, pole:c.pole, area:c.area, v240:!!c.v240, ver:c.ver}; });
     var loads=LOADS.map(function(l){ return {circuit:l.circuit, load:l.load, kind:l.kind, room:l.room, crit:!!l.crit, v240:!!l.v240}; });
+    var sig=JSON.stringify(circuits)+'|'+JSON.stringify(loads);
+    if(sig===_mgPanelSig) return;            // skip republish when nothing the panel owns changed (e.g. pure-view rerenderAll)
+    _mgPanelSig=sig;
     WiringShared.project.update({circuits:circuits, loads:loads}, true);
   }catch(e){}
 }

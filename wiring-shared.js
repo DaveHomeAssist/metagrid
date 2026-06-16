@@ -304,7 +304,7 @@
       var it = items[i] || {};
       var type = it.type != null ? String(it.type) : "unknown";
       var layer = it.layer != null ? String(it.layer) : "";
-      var floor = it.floor || "basement";
+      var floor = it.floor != null ? it.floor : "basement";
       var key = layer + " " + type;
       if (!map[key]) map[key] = { type: type, layer: layer, count: 0, label: labels[type] || type };
       map[key].count++;
