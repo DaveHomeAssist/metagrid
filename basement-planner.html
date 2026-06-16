@@ -788,7 +788,11 @@ function init() {
   syncProjectFromPlanner();                     // R4: migrate legacy items[] into the shared project
   if (window.WiringShared) {
     WiringShared.project.watch(function () {     // re-read circuits on panel change / tab refocus
+      const beforeIds = projectCircuits.map(c => c.id).join("|");
       refreshProjectCircuits();
+      if (projectCircuits.map(c => c.id).join("|") === beforeIds) return;   // circuits unchanged → skip re-render
+      const insp = document.getElementById("inspector");
+      if (insp && insp.contains(document.activeElement)) return;            // don't clobber an in-progress inspector edit
       renderInspector();
     });
   }
@@ -1727,6 +1731,7 @@ function bindEvents() {
     }
   });
   svg.addEventListener("pointermove", (e) => {
+    if (e.isPrimary === false) return;            // ignore secondary touch pointers
     const p = clientToSvg(e);
     $("#status-coords").textContent = inPlan(p)
       ? `${pxToFtIn(p.x - PLAN_ORIGIN.x)} , ${pxToFtIn(p.y - PLAN_ORIGIN.y)}`
@@ -1750,6 +1755,8 @@ function bindEvents() {
     }
   });
   const endPointer = (e) => {
+    // ignore up/cancel from a pointer that isn't the one driving the drag (multi-touch)
+    if (dragging && dragging.pointerId != null && e && e.pointerId != null && e.pointerId !== dragging.pointerId) return;
     if (dragging) {
       if (dragging.pointerId != null) { try { svg.releasePointerCapture(dragging.pointerId); } catch (_) {} }
       saveToStorage();

@@ -1388,10 +1388,10 @@ Outlet circuit (existing) ───┬─── outlet ─── outlet ──�
   // ===== R3 deep links: #partN | #calc | #appendix | #contents =====
   function mgFlash(elx){
     try{
-      var prev=elx.style.boxShadow;
       elx.style.transition='box-shadow .25s ease';
       elx.style.boxShadow='0 0 0 3px var(--accent, #f59e0b)';
-      setTimeout(function(){ elx.style.boxShadow=prev||''; },1500);
+      clearTimeout(elx._mgFlashT);                         // don't capture a mid-flash value as "previous"
+      elx._mgFlashT=setTimeout(function(){ elx.style.boxShadow=''; },1500);
     }catch(e){}
   }
   function mgHandleHash(){
@@ -1401,8 +1401,10 @@ Outlet circuit (existing) ───┬─── outlet ─── outlet ──�
     var elx=document.getElementById(id);
     if(!elx) return;
     var det=elx.closest?elx.closest('details'):null;
-    if(det) det.open=true;
-    if(elx.tagName&&elx.tagName.toLowerCase()==='details') elx.open=true;
+    // open via setOpenMuted so the 'toggle' handler does NOT markVisited/persist
+    // openSections — a deep link must not corrupt the user's saved reading progress.
+    if(det) setOpenMuted(det,true);
+    if(elx.tagName&&elx.tagName.toLowerCase()==='details') setOpenMuted(elx,true);
     try{ elx.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){ try{elx.scrollIntoView();}catch(_){} }
     mgFlash(elx);
   }
@@ -1440,7 +1442,7 @@ Outlet circuit (existing) ───┬─── outlet ─── outlet ──�
       '<strong>Project data <span style="color:var(--ink-faint,#888);font-weight:400">— live from this device</span></strong>'+
       '<div class="calc-line" style="margin-top:8px"><span>Circuits / loads / placed items</span><span>'+nC+' / '+nL+' / '+nI+'</span></div>'+
       '<div class="calc-line"><span>Connected load (est.)</span><span>'+(est.totalVA/1000).toFixed(1)+' kVA &middot; ~'+est.connectedA+' A</span></div>'+
-      '<div class="calc-line"><span>NEC 220.83 demand (est.)</span><span>'+est.demandA+' A</span></div>'+
+      '<div class="calc-line"><span>NEC 220.83 demand (est.)</span><span>'+(nL?est.demandA+' A':'&mdash;')+'</span></div>'+
       (bomRows ? '<div style="margin-top:8px;font-weight:600">Bill of materials</div>'+bomRows : '')+
       '<div style="margin-top:8px;font-size:11px;color:var(--ink-faint,#888)">Estimates only — schematic, [ASSUMED], not an inspection.</div>';
   }
