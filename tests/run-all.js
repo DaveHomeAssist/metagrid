@@ -9,6 +9,7 @@ const SUITES = [
   ["t1-deeplinks.test.js", "R1/R3: module load + deep links across all three apps"],
   ["t2-bridge.test.js", "R4: two-context project bridge round-trip + cross-tab + focus re-read"],
   ["t3-touch.test.js", "R11: pointer place/drag/undo/floor/delete + mobile chrome"],
+  ["smoke.test.js", "vigorous end-to-end: boot integrity, app workflows, persistence reload, cross-app integration + adversarial module/store"],
 ];
 
 let failed = 0;
