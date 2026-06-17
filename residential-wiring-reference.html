@@ -1261,12 +1261,13 @@ Outlet circuit (existing) ───┬─── outlet ─── outlet ──�
 
   // Restore open/closed state
   if(wasReturning && Array.isArray(state.ui.openSections)){
-    allSections.forEach(function(s){ s.open=inArr(state.ui.openSections,s.id); });
+    allSections.forEach(function(s){ setOpenMuted(s,inArr(state.ui.openSections,s.id)); });
   } else if(isMobile){
     // first mobile load: collapse everything for a short tappable index
-    allSections.forEach(function(s){ s.open=false; });
+    allSections.forEach(function(s){ setOpenMuted(s,false); });
     syncOpenSections();
   } else {
+    allSections.forEach(function(s){ if(s.open) mutedSectionIds[s.id]=true; });
     syncOpenSections(); // capture HTML defaults on first desktop visit
   }
 
