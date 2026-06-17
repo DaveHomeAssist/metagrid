@@ -39,11 +39,6 @@ jobs:
           GITHUB_ACTIONS: "true"
         run: npm run build
 
-      - name: Publish electrical suite standalone files
-        run: |
-          mkdir -p out/electrical
-          cp residential-wiring-reference.html basement-planner.html panel-schedule-56HA.html wiring-shared.js out/electrical/
-
       - name: Add Pages guard files
         run: |
           touch out/.nojekyll
