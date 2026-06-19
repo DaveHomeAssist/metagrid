@@ -124,6 +124,61 @@
   button:disabled { opacity: 0.4; cursor: default; }
   button:disabled:hover { background: #fff; }
   button.floor-btn.active { background: var(--active); color: #fff; border-color: var(--active); }
+  .scan-panel {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #f8fafc;
+    padding: 10px;
+  }
+  .scan-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .scan-summary { display: grid; gap: 6px; margin-top: 8px; }
+  .scan-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background: #fff;
+    padding: 8px;
+  }
+  .scan-card strong { display: block; font-size: 12px; }
+  .scan-card span { color: var(--muted); font-size: 11px; }
+  .scan-badge {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #bae6fd;
+    border-radius: 999px;
+    background: #f0f9ff;
+    color: #075985;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    margin-top: 6px;
+    padding: 4px 7px;
+    text-transform: uppercase;
+  }
+  .scan-badge.verified { border-color: #bbf7d0; background: #f0fdf4; color: #166534; }
+  .scan-badge.low-confidence { border-color: #fecaca; background: #fef2f2; color: #991b1b; }
+  #scan-shell-layer { pointer-events: none; }
+  .scan-shell-wall {
+    fill: none;
+    stroke: #0f766e;
+    stroke-linecap: round;
+    stroke-width: 5;
+    opacity: 0.72;
+  }
+  .scan-shell-wall.field-check { stroke: #b86b16; stroke-dasharray: 12 7; }
+  .scan-shell-wall.low-confidence { stroke: #b91c1c; stroke-dasharray: 5 6; }
+  .scan-shell-label {
+    fill: #0f766e;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .scan-shell-room {
+    fill: rgba(15, 118, 110, 0.05);
+    stroke: #0f766e;
+    stroke-dasharray: 8 5;
+    stroke-width: 1;
+  }
   .canvas-wrap {
     position: relative;
     overflow: auto;
@@ -297,7 +352,7 @@
     <h1>DAVE BASEMENT — SYSTEMS PLANNER</h1>
     <div class="meta">25′-0″ × 40′-0″ · Basement + First Floor · Scale 1/4″ = 1′-0″ · click-to-place · drag to move · Del to remove</div>
   </div>
-  <div class="actions">
+  <div class="actions" id="reports">
     <button id="btn-undo" class="small" disabled title="Undo (Cmd/Ctrl+Z)">↶ Undo</button>
     <button id="btn-redo" class="small" disabled title="Redo (Cmd/Ctrl+Shift+Z)">↷ Redo</button>
     <button id="btn-import" class="small">Import JSON</button>
@@ -343,6 +398,16 @@
     <label class="toggle-mini"><input type="checkbox" id="opt-grid" checked> Show grid</label><br>
     <label class="toggle-mini"><input type="checkbox" id="opt-codes"> Show NEC clearances</label>
     <button id="btn-reset-prefs" class="small" style="margin-top:8px">Reset preferences</button>
+    <h2 id="scan">Scan Intake</h2>
+    <div class="scan-panel">
+      <div class="empty-hint">Import scan.v1 JSON, CSV wall rows, SVG lines or paths, or DXF LINE/LWPOLYLINE geometry. PNG, JPG, PDF, and USDZ are rejected with a reason until scoped.</div>
+      <div class="scan-actions">
+        <button id="btn-scan-import" class="small">Import scan</button>
+        <button id="btn-scan-clear" class="small danger">Clear imported scan</button>
+      </div>
+      <div id="scan-message" class="empty-hint" role="status" aria-live="polite"></div>
+      <div id="scan-summary" class="scan-summary"></div>
+    </div>
   </aside>
   <!-- CANVAS -->
   <div class="canvas-wrap" id="canvas-wrap">
@@ -485,6 +550,8 @@
           </g>
           <text x="66" y="58" font-size="11" fill="#666">First floor — 56 Harding Ave (traced from A1 Floor Plan). Partitions schematic / [ASSUMED]; field-verify.</text>
         </g>
+        <!-- IMPORTED SCAN SHELLS (locked reference geometry; not part of undo snapshots) -->
+        <g id="scan-shell-layer"></g>
         <!-- CODES OVERLAY (toggleable separately) -->
         <g id="codes-layer" style="display:none">
           <rect x="553" y="115" width="72" height="60" fill="url(#hatch-red)" stroke="#d62728" stroke-dasharray="4 2" opacity="0.85"/>
@@ -549,6 +616,7 @@
   </div>
 </div>
 <input type="file" id="file-input" accept="application/json" style="display:none">
+<input type="file" id="scan-file-input" accept=".json,.svg,.dxf,.csv,.png,.jpg,.jpeg,.pdf,.usdz,application/json,image/png,image/jpeg,application/pdf" style="display:none">
 <script src="wiring-shared.js"></script>
 <script>
 "use strict";
@@ -651,6 +719,7 @@ const state = {
   nextId: 1,
   meta: structuredClone(DEFAULT_META),
   prefs: structuredClone(DEFAULT_PREFS),
+  scans: [],
 };
 // Two-stage placement (e.g. zone rectangle): track rubber-band start
 let dragStart = null;
@@ -776,6 +845,8 @@ function init() {
   renderAllItems();
   renderItemsList();
   renderProjectMeta();
+  renderScanPanel();
+  renderScanShell();
   renderInspector();
   bindEvents();
   updateStatus();
@@ -823,6 +894,281 @@ function mergePrefs(raw) {
 }
 function mergeMeta(raw) {
   return { ...DEFAULT_META, ...(raw || {}) };
+}
+function validFloor(floor) {
+  return floor === "basement" || floor === "first";
+}
+function normalizeConfidence(value) {
+  const v = String(value || "field-check").toLowerCase();
+  if (v === "verified") return "verified";
+  if (v === "low" || v === "low-confidence") return "low-confidence";
+  return "field-check";
+}
+function scanUnitScale(units) {
+  const u = String(units || "ft").toLowerCase();
+  if (u === "in" || u === "inch" || u === "inches") return PX_PER_IN;
+  if (u === "px" || u === "pixel" || u === "pixels") return 1;
+  if (u === "m" || u === "meter" || u === "meters") return PX_PER_FT * 3.28084;
+  return PX_PER_FT;
+}
+function toFiniteNumber(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+class ScanParseError extends Error {
+  constructor(code, message) {
+    super(message);
+    this.name = "ScanParseError";
+    this.code = code;
+  }
+}
+function fileExtension(file) {
+  const name = String((file && file.name) || "").toLowerCase();
+  const match = name.match(/\.([a-z0-9]+)$/);
+  return match ? match[1] : "";
+}
+function scanWall(id, x1, y1, x2, y2, confidence) {
+  const a = toFiniteNumber(x1), b = toFiniteNumber(y1), c = toFiniteNumber(x2), d = toFiniteNumber(y2);
+  if (a === null || b === null || c === null || d === null) return null;
+  return { id, x1: a, y1: b, x2: c, y2: d, confidence: normalizeConfidence(confidence) };
+}
+function normalizeScanFromWalls(options) {
+  const floor = validFloor(options.floor) ? options.floor : state.floor;
+  const confidence = normalizeConfidence(options.confidence);
+  const walls = (options.walls || []).filter(Boolean).map((wall, index) => ({
+    id: wall.id || "wall-" + (index + 1),
+    x1: wall.x1, y1: wall.y1, x2: wall.x2, y2: wall.y2,
+    height: toFiniteNumber(wall.height),
+    confidence: normalizeConfidence(wall.confidence || confidence),
+  }));
+  if (!walls.length) throw new ScanParseError("NO_WALLS", "No wall geometry found");
+  return normalizeScan({
+    schema: "scan.v1",
+    id: options.id || "scan-" + Date.now(),
+    source: options.source || "scan",
+    floor,
+    room: options.room || floorLabel(floor),
+    units: options.units || "ft",
+    confidence,
+    walls,
+    openings: options.openings || [],
+    importedAt: options.importedAt,
+    meta: options.meta || {},
+  });
+}
+function normalizeScan(raw) {
+  if (!raw || typeof raw !== "object") throw new Error("scan.v1 JSON object required");
+  const schema = raw.schema || raw.type || raw.version;
+  if (schema !== "scan.v1") throw new Error("Only scan.v1 JSON is supported");
+  const floor = validFloor(raw.floor) ? raw.floor : state.floor;
+  const units = raw.units || "ft";
+  const confidence = normalizeConfidence(raw.confidence);
+  const walls = Array.isArray(raw.walls) ? raw.walls.map((wall, index) => {
+    const x1 = toFiniteNumber(wall.x1), y1 = toFiniteNumber(wall.y1), x2 = toFiniteNumber(wall.x2), y2 = toFiniteNumber(wall.y2);
+    if (x1 === null || y1 === null || x2 === null || y2 === null) return null;
+    return {
+      id: wall.id || "wall-" + (index + 1),
+      x1, y1, x2, y2,
+      height: toFiniteNumber(wall.height),
+      confidence: normalizeConfidence(wall.confidence || confidence),
+    };
+  }).filter(Boolean) : [];
+  if (!walls.length) throw new Error("scan.v1 requires at least one wall");
+  const openings = Array.isArray(raw.openings) ? raw.openings.map((opening, index) => ({
+    id: opening.id || "opening-" + (index + 1),
+    type: opening.type || "opening",
+    wallId: opening.wallId || "",
+    x: toFiniteNumber(opening.x),
+    width: toFiniteNumber(opening.width),
+    height: toFiniteNumber(opening.height),
+  })) : [];
+  return {
+    id: raw.id || "scan-" + Date.now(),
+    schema: "scan.v1",
+    source: raw.source || "scan",
+    floor,
+    room: raw.room || floorLabel(floor),
+    units,
+    confidence,
+    walls,
+    openings,
+    meta: raw.meta || {},
+    importedAt: raw.importedAt || new Date().toISOString(),
+  };
+}
+function normalizeScans(raw) {
+  if (!Array.isArray(raw)) return [];
+  const scans = [];
+  for (const scan of raw) {
+    try { scans.push(normalizeScan(scan)); } catch (e) {}
+  }
+  return scans;
+}
+function parseCSVRows(text) {
+  const rows = [];
+  let row = [], cell = "", quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i], next = text[i + 1];
+    if (quoted && ch === '"' && next === '"') { cell += '"'; i++; continue; }
+    if (ch === '"') { quoted = !quoted; continue; }
+    if (!quoted && ch === ",") { row.push(cell.trim()); cell = ""; continue; }
+    if (!quoted && (ch === "\n" || ch === "\r")) {
+      if (ch === "\r" && next === "\n") i++;
+      row.push(cell.trim());
+      if (row.some(Boolean)) rows.push(row);
+      row = []; cell = "";
+      continue;
+    }
+    cell += ch;
+  }
+  row.push(cell.trim());
+  if (row.some(Boolean)) rows.push(row);
+  return rows;
+}
+function parseCSVScan(file, text) {
+  const rows = parseCSVRows(text);
+  if (!rows.length) throw new ScanParseError("CSV_EMPTY", "CSV file has no rows");
+  const headers = rows[0].map(h => h.toLowerCase());
+  const hasHeader = ["x1", "y1", "x2", "y2"].every(k => headers.includes(k));
+  const index = (name) => headers.indexOf(name);
+  const body = hasHeader ? rows.slice(1) : rows;
+  const walls = [];
+  let floor = state.floor, room = "", units = "ft", confidence = "field-check";
+  body.forEach((row, idx) => {
+    const get = (name, fallbackIndex) => hasHeader ? row[index(name)] : row[fallbackIndex];
+    if (hasHeader) {
+      if (get("floor") && validFloor(get("floor"))) floor = get("floor");
+      if (get("room")) room = get("room");
+      if (get("units")) units = get("units");
+      if (get("confidence")) confidence = normalizeConfidence(get("confidence"));
+    }
+    const wall = scanWall(get("id", 0) || "csv-wall-" + (idx + 1), get("x1", 0), get("y1", 1), get("x2", 2), get("y2", 3), get("confidence", 4) || confidence);
+    if (wall) walls.push(wall);
+  });
+  return normalizeScanFromWalls({ source: "csv", floor, room: room || "CSV scan", units, confidence, walls, meta: { fileName: file.name || "", parser: "csv-wall-rows" } });
+}
+function parseSvgNumber(value) {
+  const n = parseFloat(String(value || "").replace(/,/g, ""));
+  return Number.isFinite(n) ? n : null;
+}
+function parseSvgPoints(value) {
+  const nums = String(value || "").trim().split(/[\s,]+/).map(parseSvgNumber).filter(n => n !== null);
+  const pts = [];
+  for (let i = 0; i + 1 < nums.length; i += 2) pts.push({ x: nums[i], y: nums[i + 1] });
+  return pts;
+}
+function parseSvgPathSegments(d) {
+  const tokens = String(d || "").match(/[a-zA-Z]|[-+]?(?:\d*\.)?\d+(?:e[-+]?\d+)?/g) || [];
+  const walls = [];
+  let i = 0, cmd = "", cur = { x: 0, y: 0 }, start = null;
+  const nextNumber = () => parseSvgNumber(tokens[i++]);
+  while (i < tokens.length) {
+    if (/^[a-zA-Z]$/.test(tokens[i])) cmd = tokens[i++];
+    const rel = cmd === cmd.toLowerCase();
+    const upper = cmd.toUpperCase();
+    if (upper === "M") {
+      const x = nextNumber(), y = nextNumber();
+      if (x === null || y === null) break;
+      cur = { x: rel ? cur.x + x : x, y: rel ? cur.y + y : y };
+      start = { ...cur };
+      cmd = rel ? "l" : "L";
+    } else if (upper === "L") {
+      const x = nextNumber(), y = nextNumber();
+      if (x === null || y === null) break;
+      const next = { x: rel ? cur.x + x : x, y: rel ? cur.y + y : y };
+      walls.push(scanWall("svg-path-" + (walls.length + 1), cur.x, cur.y, next.x, next.y, "field-check"));
+      cur = next;
+    } else if (upper === "H") {
+      const x = nextNumber();
+      if (x === null) break;
+      const next = { x: rel ? cur.x + x : x, y: cur.y };
+      walls.push(scanWall("svg-path-" + (walls.length + 1), cur.x, cur.y, next.x, next.y, "field-check"));
+      cur = next;
+    } else if (upper === "V") {
+      const y = nextNumber();
+      if (y === null) break;
+      const next = { x: cur.x, y: rel ? cur.y + y : y };
+      walls.push(scanWall("svg-path-" + (walls.length + 1), cur.x, cur.y, next.x, next.y, "field-check"));
+      cur = next;
+    } else if (upper === "Z") {
+      if (start) walls.push(scanWall("svg-path-" + (walls.length + 1), cur.x, cur.y, start.x, start.y, "field-check"));
+      cur = start || cur;
+    } else {
+      break;
+    }
+  }
+  return walls.filter(Boolean);
+}
+function parseSVGScan(file, text) {
+  const doc = new DOMParser().parseFromString(text, "image/svg+xml");
+  if (doc.querySelector("parsererror")) throw new ScanParseError("SVG_PARSE", "SVG could not be parsed");
+  const walls = [];
+  doc.querySelectorAll("line").forEach((line, idx) => {
+    const wall = scanWall(line.getAttribute("id") || "svg-line-" + (idx + 1), line.getAttribute("x1"), line.getAttribute("y1"), line.getAttribute("x2"), line.getAttribute("y2"), "field-check");
+    if (wall) walls.push(wall);
+  });
+  doc.querySelectorAll("polyline, polygon").forEach((poly) => {
+    const pts = parseSvgPoints(poly.getAttribute("points"));
+    for (let i = 0; i + 1 < pts.length; i++) walls.push(scanWall("svg-poly-" + (walls.length + 1), pts[i].x, pts[i].y, pts[i + 1].x, pts[i + 1].y, "field-check"));
+    if (poly.tagName.toLowerCase() === "polygon" && pts.length > 2) walls.push(scanWall("svg-poly-" + (walls.length + 1), pts[pts.length - 1].x, pts[pts.length - 1].y, pts[0].x, pts[0].y, "field-check"));
+  });
+  doc.querySelectorAll("path").forEach(path => walls.push(...parseSvgPathSegments(path.getAttribute("d"))));
+  return normalizeScanFromWalls({ source: "svg", floor: state.floor, room: "SVG scan", units: "px", confidence: "field-check", walls, meta: { fileName: file.name || "", parser: "svg-line-path" } });
+}
+function dxfPairs(text) {
+  const lines = String(text || "").replace(/\r/g, "").split("\n");
+  const pairs = [];
+  for (let i = 0; i + 1 < lines.length; i += 2) pairs.push({ code: lines[i].trim(), value: lines[i + 1].trim() });
+  return pairs;
+}
+function parseDXFScan(file, text) {
+  const pairs = dxfPairs(text);
+  const walls = [];
+  for (let i = 0; i < pairs.length; i++) {
+    if (pairs[i].code !== "0") continue;
+    const entity = pairs[i].value.toUpperCase();
+    if (entity === "LINE") {
+      const vals = {};
+      for (i = i + 1; i < pairs.length && pairs[i].code !== "0"; i++) vals[pairs[i].code] = pairs[i].value;
+      i--;
+      const wall = scanWall("dxf-line-" + (walls.length + 1), vals["10"], vals["20"], vals["11"], vals["21"], "low-confidence");
+      if (wall) walls.push(wall);
+    } else if (entity === "LWPOLYLINE") {
+      const pts = [];
+      let x = null, closed = false;
+      for (i = i + 1; i < pairs.length && pairs[i].code !== "0"; i++) {
+        if (pairs[i].code === "70") closed = (parseInt(pairs[i].value, 10) & 1) === 1;
+        if (pairs[i].code === "10") x = toFiniteNumber(pairs[i].value);
+        if (pairs[i].code === "20" && x !== null) {
+          const y = toFiniteNumber(pairs[i].value);
+          if (y !== null) pts.push({ x, y });
+          x = null;
+        }
+      }
+      i--;
+      for (let j = 0; j + 1 < pts.length; j++) walls.push(scanWall("dxf-poly-" + (walls.length + 1), pts[j].x, pts[j].y, pts[j + 1].x, pts[j + 1].y, "low-confidence"));
+      if (closed && pts.length > 2) walls.push(scanWall("dxf-poly-" + (walls.length + 1), pts[pts.length - 1].x, pts[pts.length - 1].y, pts[0].x, pts[0].y, "low-confidence"));
+    }
+  }
+  return normalizeScanFromWalls({ source: "dxf", floor: state.floor, room: "DXF scan", units: "ft", confidence: "low-confidence", walls, meta: { fileName: file.name || "", parser: "dxf-line-lwpolyline" } });
+}
+const SCAN_PARSERS = [
+  { name: "scan.v1 JSON", matches: file => fileExtension(file) === "json" || /json/i.test(file.type || ""), parse: (file, text) => normalizeScan(JSON.parse(text)) },
+  { name: "CSV wall rows", matches: file => fileExtension(file) === "csv" || /csv/i.test(file.type || ""), parse: parseCSVScan },
+  { name: "SVG line/path", matches: file => fileExtension(file) === "svg" || /svg/i.test(file.type || ""), parse: parseSVGScan },
+  { name: "DXF LINE/LWPOLYLINE", matches: file => fileExtension(file) === "dxf", parse: parseDXFScan },
+];
+function parseScanFileText(file, text) {
+  const parser = SCAN_PARSERS.find(p => p.matches(file));
+  if (!parser) throw new ScanParseError("UNSUPPORTED_FORMAT", "Unsupported scan format: " + (fileExtension(file) || file.type || "unknown"));
+  try {
+    const scan = parser.parse(file, text);
+    scan.meta = { ...(scan.meta || {}), parser: parser.name, fileName: file.name || "" };
+    return scan;
+  } catch (err) {
+    if (err instanceof ScanParseError) throw err;
+    throw new ScanParseError("PARSE_FAILED", parser.name + " failed: " + err.message);
+  }
 }
 function validLayer(key) {
   return !!state.layers[key];
@@ -884,6 +1230,7 @@ function persistRaw(options = {}) {
           floor: state.floor,
           meta: state.meta,
           prefs: state.prefs,
+          scans: state.scans,
           undoStack, redoStack,
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -909,6 +1256,7 @@ function loadFromStorage() {
     if (data.floor === "basement" || data.floor === "first") state.floor = data.floor;
     state.meta = mergeMeta(data.meta);
     state.prefs = mergePrefs(data.prefs);
+    state.scans = normalizeScans(data.scans);
     if (!data.prefs) {
       state.prefs.lastFloor = state.floor;
       state.prefs.lastLayer = activeLayerFrom(state.layers);
@@ -986,6 +1334,8 @@ function syncFloorChrome() {
   document.getElementById("plan-bg").style.display       = state.floor === "basement" ? "" : "none";
   document.getElementById("plan-bg-first").style.display = state.floor === "first"    ? "" : "none";
   document.getElementById("existing-layer").style.display = state.floor === "basement" ? "" : "none";
+  renderScanShell();
+  renderScanPanel();
   updateFloorButtons();
 }
 function updateFloorButtons() {
@@ -1003,6 +1353,7 @@ function setFloor(f) {
   renderAllItems();
   renderItemsList();
   renderLayersPanel();
+  renderScanPanel();
   renderInspector();
   applyOptions();
   updateStatus();
@@ -1102,6 +1453,70 @@ function updatePrintArtifacts() {
     legend.appendChild(makeRect(x + 8, yy - 8, 9, 9, state.layers[layer].color, "#111827", 0.5));
     legend.appendChild(makeText(x + 23, yy, `${state.layers[layer].name}: ${fixtureLabel(layer, type)} (${groups[key]})`, "#111827", 9, "start", 400));
   });
+}
+function floorScans() {
+  return state.scans.filter(scan => scan.floor === state.floor);
+}
+function renderScanPanel() {
+  const summary = document.getElementById("scan-summary");
+  const clear = document.getElementById("btn-scan-clear");
+  if (!summary) return;
+  const scans = floorScans();
+  if (clear) clear.disabled = scans.length === 0;
+  if (!scans.length) {
+    summary.innerHTML = `<div class="empty-hint">No scan shell imported for ${floorLabel(state.floor)}.</div>`;
+    return;
+  }
+  summary.innerHTML = scans.map(scan => `
+    <div class="scan-card">
+      <strong>${escapeHtml(scan.room || floorLabel(scan.floor))}</strong>
+      <span>${escapeHtml(scan.source || "scan")} · ${scan.walls.length} wall${scan.walls.length === 1 ? "" : "s"}</span><br>
+      <span class="scan-badge ${escapeHtml(scan.confidence)}">${escapeHtml(scan.confidence)}</span>
+    </div>
+  `).join("");
+}
+function showScanMessage(message, isError = false) {
+  const el = document.getElementById("scan-message");
+  if (!el) return;
+  el.textContent = message || "";
+  el.style.color = isError ? "#b91c1c" : "";
+}
+function renderScanShell() {
+  const g = document.getElementById("scan-shell-layer");
+  if (!g) return;
+  g.innerHTML = "";
+  const scans = floorScans();
+  for (const scan of scans) {
+    const scale = scanUnitScale(scan.units);
+    const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    group.classList.add("scan-shell");
+    group.dataset.scanId = scan.id;
+    const xs = [], ys = [];
+    for (const wall of scan.walls) {
+      const x1 = PLAN_ORIGIN.x + wall.x1 * scale;
+      const y1 = PLAN_ORIGIN.y + wall.y1 * scale;
+      const x2 = PLAN_ORIGIN.x + wall.x2 * scale;
+      const y2 = PLAN_ORIGIN.y + wall.y2 * scale;
+      xs.push(x1, x2); ys.push(y1, y2);
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute("x1", x1);
+      line.setAttribute("y1", y1);
+      line.setAttribute("x2", x2);
+      line.setAttribute("y2", y2);
+      line.classList.add("scan-shell-wall", wall.confidence);
+      group.appendChild(line);
+    }
+    if (xs.length && ys.length) {
+      const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
+      const room = makeRect(minX, minY, maxX - minX, maxY - minY, "rgba(15, 118, 110, 0.05)", "#0f766e", 1);
+      room.classList.add("scan-shell-room");
+      group.insertBefore(room, group.firstChild);
+      const label = makeText(minX + 8, minY - 8, "Scan Shell · " + (scan.room || floorLabel(scan.floor)), "#0f766e", 10, "start", 700);
+      label.classList.add("scan-shell-label");
+      group.appendChild(label);
+    }
+    g.appendChild(group);
+  }
 }
 function showResumeStatus() {
   const el = document.getElementById("status-resume");
@@ -1836,6 +2251,9 @@ function bindEvents() {
   $("#btn-export").addEventListener("click", exportJSON);
   $("#btn-import").addEventListener("click", () => $("#file-input").click());
   $("#file-input").addEventListener("change", importJSON);
+  $("#btn-scan-import").addEventListener("click", () => $("#scan-file-input").click());
+  $("#scan-file-input").addEventListener("change", importScanFile);
+  $("#btn-scan-clear").addEventListener("click", clearActiveFloorScans);
   $("#btn-svg").addEventListener("click", exportSVG);
   $("#btn-bom").addEventListener("click", exportBOM);
   $("#btn-bom-md").addEventListener("click", copyBOMMarkdown);
@@ -1849,6 +2267,7 @@ function bindEvents() {
     renderAllItems();
     renderItemsList();
     renderLayersPanel();
+    renderScanPanel();
     renderInspector();
     saveToStorage();
   });
@@ -1951,6 +2370,7 @@ function exportJSON() {
     nextId: state.nextId,
     meta: state.meta,
     prefs: state.prefs,
+    scans: state.scans,
     exportedAt: new Date().toISOString(),
     schema: "basement_planner_v2"
   }, null, 2)], { type: "application/json" });
@@ -1970,9 +2390,12 @@ function importJSON(e) {
       if (data.nextId) state.nextId = data.nextId;
       if (data.meta) state.meta = mergeMeta(data.meta);
       if (data.prefs) { state.prefs = mergePrefs(data.prefs); applyPrefsToState(); }
+      state.scans = normalizeScans(data.scans);
       renderLayersPanel();
       renderFixtures();
       renderExisting();
+      renderScanPanel();
+      renderScanShell();
       renderAllItems();
       renderItemsList();
       renderProjectMeta();
@@ -1987,6 +2410,70 @@ function importJSON(e) {
   };
   reader.readAsText(f);
   e.target.value = "";
+}
+function importScanData(raw) {
+  const scan = normalizeScan(raw);
+  state.scans = state.scans.filter(existing => existing.id !== scan.id);
+  state.scans.push(scan);
+  if (scan.floor !== state.floor) setFloor(scan.floor);
+  renderScanPanel();
+  renderScanShell();
+  persistRaw({ keepPrefs: true });
+  showScanMessage("Imported " + (scan.meta?.parser || scan.source || "scan") + " scan shell.", false);
+  $("#status-coords").textContent = "Imported scan shell";
+}
+function importParsedScan(scan) {
+  state.scans = state.scans.filter(existing => existing.id !== scan.id);
+  state.scans.push(scan);
+  if (scan.floor !== state.floor) setFloor(scan.floor);
+  renderScanPanel();
+  renderScanShell();
+  persistRaw({ keepPrefs: true });
+  showScanMessage("Imported " + (scan.meta?.parser || scan.source || "scan") + " scan shell.", false);
+  $("#status-coords").textContent = "Imported scan shell";
+}
+function importScanText(name, text, type = "") {
+  try {
+    const scan = parseScanFileText({ name, type }, text);
+    importParsedScan(scan);
+  } catch (err) {
+    const code = err.code ? err.code + ": " : "";
+    showScanMessage(code + err.message, true);
+    $("#status-coords").textContent = "Scan import failed";
+    throw err;
+  }
+}
+function importScanFile(e) {
+  const f = e.target.files[0];
+  if (!f) return;
+  if (!SCAN_PARSERS.some(p => p.matches(f))) {
+    const reason = "Unsupported scan format: " + (fileExtension(f) || f.type || "unknown");
+    showScanMessage(reason, true);
+    $("#status-coords").textContent = reason;
+    e.target.value = "";
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      importParsedScan(parseScanFileText(f, ev.target.result));
+    } catch (err) {
+      const code = err.code ? err.code + ": " : "";
+      showScanMessage(code + err.message, true);
+      $("#status-coords").textContent = "Scan import failed";
+    }
+  };
+  reader.readAsText(f);
+  e.target.value = "";
+}
+function clearActiveFloorScans() {
+  const before = state.scans.length;
+  state.scans = state.scans.filter(scan => scan.floor !== state.floor);
+  if (state.scans.length === before) return;
+  renderScanPanel();
+  renderScanShell();
+  persistRaw({ keepPrefs: true });
+  $("#status-coords").textContent = "Cleared scan shell for " + floorLabel(state.floor);
 }
 function exportSVG() {
   // Clone the SVG, strip selection styling, embed
