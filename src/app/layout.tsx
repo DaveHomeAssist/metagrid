@@ -5,6 +5,15 @@ import Footer from "@/components/Footer";
 import GridBackground from "@/components/GridBackground";
 import "./globals.css";
 
+// GitHub Pages serves this app under /metagrid, but Next.js does not
+// auto-prefix basePath onto metadata icons, so derive it explicitly.
+const faviconBase =
+  process.env.GITHUB_ACTIONS === "true" ||
+  process.env.GITHUB_PAGES === "true" ||
+  process.env.STATIC_EXPORT === "true"
+    ? "/metagrid"
+    : "";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://metagrid.energy"),
   title: {
@@ -12,7 +21,7 @@ export const metadata: Metadata = {
     template: "%s | Metagrid",
   },
   icons: {
-    icon: "/favicon.svg",
+    icon: `${faviconBase}/favicon.svg`,
   },
   description:
     "Metagrid is engineering a hierarchical, safety-first wireless power network using metamaterials and adaptive control — delivering utility-scale energy to remote AI data centers without traditional last-mile wiring.",
