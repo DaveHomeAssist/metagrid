@@ -5,7 +5,7 @@ const fs = require("fs");
 const path = require("path");
 const { JSDOM, VirtualConsole } = require("jsdom");
 
-const DIR = path.join(__dirname, "..");
+const DIR = path.join(__dirname, "..", "public", "tools");
 const WIRING = fs.readFileSync(path.join(DIR, "wiring-shared.js"), "utf8");
 
 let pass = 0,

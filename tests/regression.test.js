@@ -1,7 +1,7 @@
 /* Regression-equality test: module vs verbatim inline oracle.
  * Oracle = the exact arithmetic copied from the inline files. If the module
  * ever drifts from the inline math, these assertions fail. */
-const W = require(require("path").join(__dirname, "..", "wiring-shared.js"));
+const W = require(require("path").join(__dirname, "..", "public", "tools", "wiring-shared.js"));
 
 let pass = 0,
   fail = 0;

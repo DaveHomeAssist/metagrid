@@ -9,7 +9,7 @@ const vm = require("vm");
 const path = require("path");
 const { JSDOM } = require("jsdom");
 
-const DIR = require("path").join(__dirname, "..");
+const DIR = require("path").join(__dirname, "..", "public", "tools");
 const FILES = ["residential-wiring-reference.html", "panel-schedule-56HA.html", "basement-planner.html"];
 const WIRING = fs.readFileSync(path.join(DIR, "wiring-shared.js"), "utf8");
 

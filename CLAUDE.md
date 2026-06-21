@@ -36,3 +36,4 @@ Metagrid is a public facing site for a wireless power infrastructure concept. It
 ## Session Log
 
 [2026-03-18] [Metagrid] [docs] Add AGENTS baseline
+[2026-06-21] [Metagrid] [build] Ship electrical suite: moved 3 HTML tools + wiring-shared.js to public/tools/ so they're in the static export; added /tools/ landing page. Live at /metagrid/tools/. Build + full test suite pass.

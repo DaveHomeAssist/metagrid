@@ -9,7 +9,7 @@ const fs = require("fs");
 const path = require("path");
 const { JSDOM } = require("jsdom");
 
-const DIR = require("path").join(__dirname, "..");
+const DIR = require("path").join(__dirname, "..", "public", "tools");
 const WIRING = fs.readFileSync(path.join(DIR, "wiring-shared.js"), "utf8");
 
 let fail = 0;

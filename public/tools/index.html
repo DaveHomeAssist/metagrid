@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>Electrical Tools — Metagrid</title>
+<style>
+  :root { color-scheme: dark; --bg:#0c0f14; --panel:#141a22; --line:#243040; --ink:#e7edf4; --ink-faint:#8a97a8; --accent:#39c0c8; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+  .wrap { max-width:760px; margin:0 auto; padding:48px 20px 64px; }
+  h1 { font-size:1.7rem; margin:0 0 6px; }
+  p.lede { color:var(--ink-faint); margin:0 0 28px; }
+  a.card { display:block; text-decoration:none; color:inherit; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px 20px; margin:12px 0; transition:border-color .15s, transform .15s; }
+  a.card:hover { border-color:var(--accent); transform:translateY(-1px); }
+  a.card .t { font-weight:600; font-size:1.05rem; }
+  a.card .d { color:var(--ink-faint); font-size:.92rem; margin-top:4px; }
+  .glyph { color:var(--accent); margin-right:8px; }
+  footer { color:var(--ink-faint); font-size:.82rem; margin-top:32px; border-top:1px solid var(--line); padding-top:16px; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>⚡ Electrical Tools</h1>
+    <p class="lede">Standalone, zero-dependency residential wiring tools. Data is stored locally in your browser; the three tools share project state across tabs.</p>
+
+    <a class="card" href="residential-wiring-reference.html">
+      <div class="t"><span class="glyph">📘</span>Residential Wiring Reference</div>
+      <div class="d">NEC code reference plus an interactive box-fill calculator (NEC 314.16). Start here.</div>
+    </a>
+    <a class="card" href="panel-schedule-56HA.html">
+      <div class="t"><span class="glyph">🔌</span>Panel Schedule — 56HA</div>
+      <div class="d">Editable panel schedule with NEC 220.83 load/demand math, GFCI/test log, and JSON/Notion export.</div>
+    </a>
+    <a class="card" href="basement-planner.html">
+      <div class="t"><span class="glyph">🗺️</span>Basement Systems Planner</div>
+      <div class="d">Place and drag electrical items on a floor plan; assign circuits from the panel schedule. Export JSON/SVG/BOM/PDF.</div>
+    </a>
+
+    <footer>Schematic / not to scale. For planning reference only — verify all work against current code and local requirements.</footer>
+  </div>
+</body>
+</html>
