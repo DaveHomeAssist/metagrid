@@ -51,6 +51,16 @@ export const metadata: Metadata = {
   },
 };
 
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Metagrid",
+  url: "https://metagrid.energy",
+  logo: "https://metagrid.energy/favicon.svg",
+  description:
+    "Metagrid is engineering a hierarchical, safety-first wireless power network using metamaterials and adaptive control — delivering utility-scale energy to remote AI data centers without traditional last-mile wiring.",
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -62,6 +72,12 @@ export default function RootLayout({
       className={`${dmSans.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable}`}
     >
       <body className="bg-[#0a0c10] text-[#e8eaf0] antialiased min-h-screen overflow-x-hidden">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationJsonLd),
+          }}
+        />
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-[#00d4aa] focus:text-[#0a0c10] focus:rounded-lg focus:text-sm focus:font-semibold"

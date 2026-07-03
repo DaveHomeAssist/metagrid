@@ -37,6 +37,10 @@ jobs:
       - name: Build static export
         env:
           GITHUB_ACTIONS: "true"
+          # Baked into the client bundle at build time. Until this repo
+          # secret is created the contact form shows its error state on
+          # submit instead of delivering.
+          NEXT_PUBLIC_FORMSPREE_ID: ${{ secrets.NEXT_PUBLIC_FORMSPREE_ID }}
         run: npm run build
 
       - name: Add Pages guard files
