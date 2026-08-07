@@ -4,13 +4,14 @@ import FadeIn from "@/components/FadeIn";
 
 export const metadata: Metadata = {
   title: "Technology",
+  alternates: { canonical: "https://davehomeassist.github.io/metagrid/technology/" },
   description:
     "Three interlocking technology pillars — metamaterials, adaptive beamforming, and hierarchical distribution — form the Metagrid wireless power architecture.",
   openGraph: {
     title: "Technology | Metagrid",
     description:
       "Three interlocking technology pillars — metamaterials, adaptive beamforming, and hierarchical distribution — form the Metagrid wireless power architecture.",
-    url: "https://metagrid.energy/technology",
+    url: "https://davehomeassist.github.io/metagrid/technology/",
   },
   twitter: {
     title: "Technology | Metagrid",

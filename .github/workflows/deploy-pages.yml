@@ -31,15 +31,28 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Audit production dependencies
+        run: npm run audit:prod
+
       - name: Lint
         run: npm run lint
+
+      - name: Test electrical suite
+        run: npm run test:suite
+
+      - name: Check contact form configuration
+        env:
+          NEXT_PUBLIC_FORMSPREE_ID: ${{ secrets.NEXT_PUBLIC_FORMSPREE_ID }}
+        run: |
+          if [ -z "$NEXT_PUBLIC_FORMSPREE_ID" ]; then
+            echo "::warning::NEXT_PUBLIC_FORMSPREE_ID is not configured; the deployed form will show its unavailable state."
+          fi
 
       - name: Build static export
         env:
           GITHUB_ACTIONS: "true"
           # Baked into the client bundle at build time. Until this repo
-          # secret is created the contact form shows its error state on
-          # submit instead of delivering.
+          # secret is created the contact form is explicitly unavailable.
           NEXT_PUBLIC_FORMSPREE_ID: ${{ secrets.NEXT_PUBLIC_FORMSPREE_ID }}
         run: npm run build
 

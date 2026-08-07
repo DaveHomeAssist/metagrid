@@ -4,13 +4,14 @@ import FadeIn from "@/components/FadeIn";
 
 export const metadata: Metadata = {
   title: "Safety",
+  alternates: { canonical: "https://davehomeassist.github.io/metagrid/safety/" },
   description:
     "Metagrid's safety model is built into every layer — beam confinement, real-time sensing, hardware interlocks, and a default-OFF fail-safe architecture designed to meet FCC, IEEE, and ICNIRP standards.",
   openGraph: {
     title: "Safety | Metagrid",
     description:
       "Metagrid's safety model is built into every layer — beam confinement, real-time sensing, hardware interlocks, and a default-OFF fail-safe architecture designed to meet FCC, IEEE, and ICNIRP standards.",
-    url: "https://metagrid.energy/safety",
+    url: "https://davehomeassist.github.io/metagrid/safety/",
   },
   twitter: {
     title: "Safety | Metagrid",

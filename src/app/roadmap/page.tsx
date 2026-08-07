@@ -4,13 +4,14 @@ import FadeIn from "@/components/FadeIn";
 
 export const metadata: Metadata = {
   title: "Roadmap",
+  alternates: { canonical: "https://davehomeassist.github.io/metagrid/roadmap/" },
   description:
     "Three funding-gated R&D phases from concept validation to integrated prototype. Each milestone has defined exit criteria — no milestone, no next phase.",
   openGraph: {
     title: "Roadmap | Metagrid",
     description:
       "Three funding-gated R&D phases from concept validation to integrated prototype. Each milestone has defined exit criteria — no milestone, no next phase.",
-    url: "https://metagrid.energy/roadmap",
+    url: "https://davehomeassist.github.io/metagrid/roadmap/",
   },
   twitter: {
     title: "Roadmap | Metagrid",

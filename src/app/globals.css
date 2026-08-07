@@ -1,5 +1,27 @@
 @import "tailwindcss";
 
+@keyframes metagrid-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.metagrid-fade-in {
+  animation: metagrid-fade-in 0.7s ease both;
+  animation-delay: var(--metagrid-fade-delay, 0s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .metagrid-fade-in {
+    animation: none;
+  }
+}
+
 :root {
   --mg-bg: #0a0c10;
   --mg-surface: #12151c;

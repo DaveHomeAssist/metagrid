@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://metagrid.energy/sitemap.xml
+Sitemap: https://davehomeassist.github.io/metagrid/sitemap.xml

@@ -3,8 +3,8 @@ import type { MetadataRoute } from "next";
 export const dynamic = "force-static";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://metagrid.energy";
-  const pages = ["", "/technology", "/roadmap", "/safety", "/team", "/faq", "/contact"];
+  const base = "https://davehomeassist.github.io/metagrid/";
+  const pages = ["", "technology/", "roadmap/", "safety/", "team/", "faq/", "contact/"];
 
   return pages.map((path) => ({
     url: `${base}${path}`,

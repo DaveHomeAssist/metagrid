@@ -4,13 +4,14 @@ import FadeIn from "@/components/FadeIn";
 
 export const metadata: Metadata = {
   title: "Team",
+  alternates: { canonical: "https://davehomeassist.github.io/metagrid/team/" },
   description:
     "Meet the team behind Metagrid and the technical roles we're actively building toward — from RF engineering to metamaterials research and safety compliance.",
   openGraph: {
     title: "Team | Metagrid",
     description:
       "Meet the team behind Metagrid and the technical roles we're actively building toward — from RF engineering to metamaterials research and safety compliance.",
-    url: "https://metagrid.energy/team",
+    url: "https://davehomeassist.github.io/metagrid/team/",
   },
   twitter: {
     title: "Team | Metagrid",

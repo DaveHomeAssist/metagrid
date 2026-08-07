@@ -15,7 +15,8 @@ const faviconBase =
     : "";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://metagrid.energy"),
+  metadataBase: new URL("https://davehomeassist.github.io/metagrid/"),
+  alternates: { canonical: "https://davehomeassist.github.io/metagrid/" },
   title: {
     default: "Metagrid — Wireless Power Infrastructure",
     template: "%s | Metagrid",
@@ -30,12 +31,12 @@ export const metadata: Metadata = {
     title: "Metagrid — Wireless Power for AI Infrastructure",
     description:
       "Engineering wireless power delivery for remote AI data centers using metamaterials and adaptive control. Patent pending.",
-    url: "https://metagrid.energy",
+    url: "https://davehomeassist.github.io/metagrid/",
     siteName: "Metagrid",
     type: "website",
     images: [
       {
-        url: "/og-image.svg",
+        url: "https://davehomeassist.github.io/metagrid/og-image.svg",
         width: 1200,
         height: 630,
         alt: "Metagrid — Wireless Power for AI Infrastructure",
@@ -47,7 +48,7 @@ export const metadata: Metadata = {
     title: "Metagrid — Wireless Power for AI Infrastructure",
     description:
       "Engineering wireless power delivery for remote AI data centers using metamaterials and adaptive control.",
-    images: ["/og-image.svg"],
+    images: ["https://davehomeassist.github.io/metagrid/og-image.svg"],
   },
 };
 
@@ -55,8 +56,8 @@ const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "Metagrid",
-  url: "https://metagrid.energy",
-  logo: "https://metagrid.energy/favicon.svg",
+  url: "https://davehomeassist.github.io/metagrid/",
+  logo: "https://davehomeassist.github.io/metagrid/favicon.svg",
   description:
     "Metagrid is engineering a hierarchical, safety-first wireless power network using metamaterials and adaptive control — delivering utility-scale energy to remote AI data centers without traditional last-mile wiring.",
 };

@@ -6,10 +6,10 @@ Metagrid is engineering a hierarchical, safety-first wireless power network usin
 
 ## Stack
 
-- **Framework:** Next.js 15 (App Router)
+- **Framework:** Next.js 16 (App Router)
 - **Styling:** Tailwind CSS 4
 - **Fonts:** Local/system fallback stack (no external font fetch at runtime)
-- **Deploy target:** Vercel
+- **Deploy target:** GitHub Pages static export
 
 ## Getting Started
 
@@ -61,9 +61,13 @@ archive/
 ## Deploy
 
 ```bash
-npm run build
-npx vercel
+npm run audit:prod
+npm run lint
+npm run test:suite
+GITHUB_ACTIONS=true npm run build
 ```
+
+Pushes to `main` publish through `.github/workflows/deploy-pages.yml`. The current canonical URL is [https://davehomeassist.github.io/metagrid/](https://davehomeassist.github.io/metagrid/) because `metagrid.energy` has no DNS records.
 
 ## Contact Form
 
@@ -73,7 +77,11 @@ The contact form posts to Formspree. Set `NEXT_PUBLIC_FORMSPREE_ID` before deplo
 export NEXT_PUBLIC_FORMSPREE_ID=your_form_id
 ```
 
-Without that value, the form will submit to the placeholder endpoint.
+Without that value, the submit button is disabled and the page clearly reports that the form is temporarily unavailable. The deployment workflow emits a warning until the secret exists.
+
+## Private residence tools
+
+The legacy electrical tools remain reachable for direct handoff links, but every tool page is `noindex,nofollow` and excluded from the sitemap. They are not part of the public investor-site information architecture.
 
 ## Accessibility / SEO
 

@@ -3,13 +3,14 @@ import ContactForm from "./ContactForm";
 
 export const metadata: Metadata = {
   title: "Get Involved",
+  alternates: { canonical: "https://davehomeassist.github.io/metagrid/contact/" },
   description:
     "Connect with Metagrid as an investor, researcher, strategic partner, or press. Request an intro, propose a collaboration, or access the press kit.",
   openGraph: {
     title: "Get Involved | Metagrid",
     description:
       "Connect with Metagrid as an investor, researcher, strategic partner, or press. Request an intro, propose a collaboration, or access the press kit.",
-    url: "https://metagrid.energy/contact",
+    url: "https://davehomeassist.github.io/metagrid/contact/",
   },
   twitter: {
     title: "Get Involved | Metagrid",
@@ -23,7 +24,7 @@ export default function ContactPage() {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "Metagrid",
-    url: "https://metagrid.energy",
+    url: "https://davehomeassist.github.io/metagrid/",
   };
 
   return (

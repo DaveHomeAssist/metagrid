@@ -69,7 +69,10 @@ function validateContactForm(values: ContactFormValues): ContactFormErrors {
 }
 
 function getFormspreeEndpoint(formspreeId: string | undefined): string | null {
-  return formspreeId ? `https://formspree.io/f/${formspreeId}` : null;
+  const normalizedId = formspreeId?.trim();
+  return normalizedId && /^[A-Za-z0-9_-]{4,64}$/.test(normalizedId)
+    ? `https://formspree.io/f/${normalizedId}`
+    : null;
 }
 
 export default function ContactForm() {
@@ -82,6 +85,7 @@ export default function ContactForm() {
     value: ContactFormValues[K]
   ) => {
     setForm((current) => ({ ...current, [field]: value }));
+    if (submitStatus === "error") setSubmitStatus("idle");
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -111,6 +115,9 @@ export default function ContactForm() {
       return;
     }
 
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 12_000);
+
     try {
       const response = await fetch(formspreeEndpoint, {
         method: "POST",
@@ -119,6 +126,7 @@ export default function ContactForm() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(normalizedForm),
+        signal: controller.signal,
       });
 
       if (response.ok) {
@@ -130,8 +138,12 @@ export default function ContactForm() {
       }
     } catch {
       setSubmitStatus("error");
+    } finally {
+      window.clearTimeout(timeout);
     }
   };
+
+  const formAvailable = getFormspreeEndpoint(CONTACT_FORMSPREE_ID) !== null;
 
   const inputClass =
     "font-[var(--font-body)] text-sm p-3 bg-[#12151c] border border-[#1f2533] rounded-md text-[#e8eaf0] w-full outline-none focus:border-[#00d4aa] transition-colors";
@@ -172,6 +184,8 @@ export default function ContactForm() {
                 value={form.name}
                 onChange={(event) => updateField("name", event.target.value)}
                 className={inputClass}
+                autoComplete="name"
+                maxLength={200}
                 required
                 aria-required="true"
                 aria-describedby={errors.name ? "name-error" : undefined}
@@ -192,6 +206,8 @@ export default function ContactForm() {
                 value={form.email}
                 onChange={(event) => updateField("email", event.target.value)}
                 className={inputClass}
+                autoComplete="email"
+                maxLength={320}
                 required
                 aria-required="true"
                 aria-describedby={errors.email ? "email-error" : undefined}
@@ -227,18 +243,28 @@ export default function ContactForm() {
                 value={form.message}
                 onChange={(event) => updateField("message", event.target.value)}
                 className={`${inputClass} resize-y`}
+                maxLength={5000}
               />
             </div>
             <button
               type="submit"
-              disabled={submitStatus === "submitting"}
+              disabled={submitStatus === "submitting" || !formAvailable}
               className="w-full py-3 text-sm font-semibold bg-[#00d4aa] text-[#0a0c10] rounded-md hover:brightness-110 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {submitStatus === "submitting" ? "Sending..." : "Send Request"}
+              {!formAvailable
+                ? "Contact form unavailable"
+                : submitStatus === "submitting"
+                  ? "Sending..."
+                  : "Send Request"}
             </button>
             <div aria-live="polite" className="mt-4">
+              {!formAvailable && (
+                <p className="text-amber-300">
+                  The contact form is temporarily unavailable. Please check back shortly.
+                </p>
+              )}
               {submitStatus === "success" && <p className="text-[#00d4aa]">Message sent. We&apos;ll be in touch.</p>}
-              {submitStatus === "error" && <p className="text-red-400">Something went wrong. Please try again.</p>}
+              {submitStatus === "error" && <p className="text-red-400">We couldn&apos;t send your message. Please try again later.</p>}
             </div>
           </form>
         </FadeIn>
