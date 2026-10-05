@@ -10,6 +10,10 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
+## Workspace contract
+
+Read `~/Code/ops-hub/90-governance/WORKSPACE_OPERATING_RULES.md` before project rules, including COMMS (one entry on the shared Agent Communications Page per session).
+
 ## Status naming
 
 Name work with one string everywhere (chat status title, session title, Notion
