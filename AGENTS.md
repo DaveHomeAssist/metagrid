@@ -14,15 +14,10 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 Read `~/Code/ops-hub/90-governance/WORKSPACE_OPERATING_RULES.md` before project rules, including COMMS (one entry on the shared Agent Communications Page per session).
 
-## Status naming
+## Session naming
 
-Name work with one string everywhere (chat status title, session title, Notion
-Status Check Runs "Human Name"):
+Follow [Status Naming](https://github.com/DaveHomeAssist/skills/blob/master/status-naming.md), the canonical authority for the format, parent/subproject emoji map, phases, date semantics and exceptions.
 
-`Project | 🚦 | Phase | Title → state, reason | MM-DD`
+`<emoji(s)> <Project> | <PHASE> | <Title> <MM-DD>`
 
-- 🚦: 🟢 complete and verified · 🟡 partial · 🔴 not started, blocked or failed · ⚪ unverifiable.
-  Add ⏳ scheduled, 🙋 awaiting Dave or 🚧 blocked to 🟡/🔴/⚪, never to 🟢.
-- Phase: Research, Design, Build, Audit or Scheduled. MM-DD: date of the latest light change.
-- Every light change gets a new name: a `RENAME:` line in chat and the Notion row updated.
-- Canonical source: https://github.com/DaveHomeAssist/skills/blob/master/status-naming.md
+Preserve Dave's manual titles and protected or uncertain sessions. Status belongs in the body; status changes do not authorize renames or Notion writes. Local instructions extend this rule only through a named, purposeful exception; they do not maintain a competing format.
